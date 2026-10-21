@@ -5,7 +5,6 @@ import {
   MapPin,
   Clock,
   MessageSquare,
-  Send,
   CheckCircle,
   Users,
   Globe,
@@ -46,16 +45,35 @@ export default function ContactUs() {
 
     setLoading(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      setLoading(false);
-      setSubmitted(true);
-      toast.success("Message sent successfully! We'll get back to you soon.");
-      setForm({ name: "", email: "", subject: "", message: "" });
+    try {
+      // BACKEND API CALL
+      // Agar aapke frontend .env mein URL hai toh import.meta.env.VITE_API_URL use karein
+      const API_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
       
-      // Reset submitted state after 5 seconds
-      setTimeout(() => setSubmitted(false), 5000);
-    }, 1500);
+      const response = await fetch(`${API_URL}/api/contact`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(form),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setSubmitted(true);
+        toast.success("Message sent successfully! We'll get back to you soon.");
+        setForm({ name: "", email: "", subject: "", message: "" });
+        setTimeout(() => setSubmitted(false), 5000);
+      } else {
+        toast.error(data.error || "Failed to send message. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      toast.error("Network error. Please check if the server is running.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const contactInfo = [
@@ -107,67 +125,53 @@ export default function ContactUs() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-      {/* Hero Header */}
-      <div className="relative bg-gradient-to-r from-orange-500 via-orange-600 to-yellow-500 overflow-hidden">
-        <div className="absolute inset-0">
-          <div className="absolute top-20 left-10 animate-float">
-            <Coffee className="h-16 w-16 text-white/20" />
+    <div className="min-h-screen bg-[#faf9f6] relative overflow-hidden">
+      {/* Background Decorative Elements */}
+      <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-br from-orange-500 via-orange-600 to-yellow-500 rounded-b-[40%] md:rounded-b-[20%] shadow-xl z-0"></div>
+
+      {/* Hero Header Content */}
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-24 md:pt-24 md:pb-32">
+        <div className="text-center">
+          <div className="inline-flex items-center justify-center p-4 bg-white/20 backdrop-blur-md rounded-full mb-6 shadow-lg border border-white/30">
+            <MessageSquare className="h-8 w-8 text-white" />
+            <Sparkles className="h-4 w-4 text-yellow-300 ml-1 animate-pulse" />
           </div>
-          <div className="absolute bottom-20 right-10 animate-float animation-delay-1000">
-            <ChefHat className="h-20 w-20 text-white/20" />
-          </div>
-        </div>
-        
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 relative z-10">
-          <div className="text-center">
-            <div className="inline-flex items-center justify-center p-4 bg-white/20 backdrop-blur-sm rounded-full mb-6">
-              <MessageSquare className="h-8 w-8 text-white" />
-              <Sparkles className="h-4 w-4 text-yellow-300 ml-1 animate-pulse" />
-            </div>
-            <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
-              Get in <span className="text-yellow-300">Touch</span>
-            </h1>
-            <p className="text-xl text-orange-100 max-w-2xl mx-auto">
-              We're here to help! Whether you have questions, feedback, or just want to say hello, 
-              we'd love to hear from you.
-            </p>
-          </div>
+          <h1 className="text-4xl md:text-6xl font-extrabold text-white mb-6 tracking-tight drop-shadow-md">
+            Get in <span className="text-yellow-300">Touch</span>
+          </h1>
+          <p className="text-lg md:text-xl text-orange-50 max-w-2xl mx-auto font-medium">
+            Whether you have questions, feedback, or just want to say hello, 
+            our team is ready to assist you.
+          </p>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+      {/* Main Content Area */}
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-20 pb-20">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          
           {/* Left Column - Contact Info */}
-          <div className="lg:col-span-1 space-y-8">
+          <div className="lg:col-span-1 space-y-6">
             {/* Contact Cards */}
-            <div className="space-y-6">
-              <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
-                <Users className="h-6 w-6 text-orange-600" />
-                Contact Information
-              </h2>
-              
+            <div className="space-y-4">
               {contactInfo.map((info, index) => (
                 <div 
                   key={index}
-                  className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+                  className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300"
                 >
                   <div className="flex items-start gap-4">
-                    <div className="p-3 bg-orange-100 rounded-xl">
-                      <div className="text-orange-600">
-                        {info.icon}
-                      </div>
+                    <div className="p-3 bg-orange-100/50 text-orange-600 rounded-xl">
+                      {info.icon}
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">{info.title}</h3>
-                      <div className="space-y-1">
+                      <h3 className="text-lg font-bold text-gray-900 mb-1">{info.title}</h3>
+                      <div className="space-y-0.5">
                         {info.details.map((detail, idx) => (
-                          <p key={idx} className="text-gray-700">{detail}</p>
+                          <p key={idx} className="text-gray-600 text-sm font-medium">{detail}</p>
                         ))}
                       </div>
-                      <p className="text-sm text-gray-500 mt-3 flex items-center gap-1">
-                        <CheckCircle className="h-4 w-4 text-green-500" />
+                      <p className="text-xs text-green-600 font-semibold mt-3 flex items-center gap-1">
+                        <CheckCircle className="h-3.5 w-3.5" />
                         {info.description}
                       </p>
                     </div>
@@ -177,46 +181,41 @@ export default function ContactUs() {
             </div>
 
             {/* Business Hours */}
-            <div className="bg-gradient-to-br from-orange-50 to-yellow-50 border border-orange-100 rounded-2xl p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <Clock className="h-6 w-6 text-orange-600" />
-                <h3 className="text-xl font-semibold text-gray-900">Business Hours</h3>
+            <div className="bg-white/80 backdrop-blur-lg border border-white rounded-2xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+              <div className="flex items-center gap-3 mb-5">
+                <div className="p-2 bg-orange-100 rounded-lg text-orange-600">
+                  <Clock className="h-5 w-5" />
+                </div>
+                <h3 className="text-lg font-bold text-gray-900">Business Hours</h3>
               </div>
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-700">Monday - Friday</span>
-                  <span className="font-semibold text-gray-900">9:00 AM - 6:00 PM</span>
+              <div className="space-y-3 text-sm">
+                <div className="flex justify-between items-center text-gray-600">
+                  <span>Mon - Fri</span>
+                  <span className="font-bold text-gray-900">9:00 AM - 6:00 PM</span>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-700">Saturday</span>
-                  <span className="font-semibold text-gray-900">10:00 AM - 4:00 PM</span>
+                <div className="flex justify-between items-center text-gray-600">
+                  <span>Saturday</span>
+                  <span className="font-bold text-gray-900">10:00 AM - 4:00 PM</span>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-700">Sunday</span>
-                  <span className="font-semibold text-gray-900">Closed</span>
+                <div className="flex justify-between items-center text-gray-600">
+                  <span>Sunday</span>
+                  <span className="font-bold text-red-500">Closed</span>
                 </div>
-              </div>
-              <div className="mt-6 p-3 bg-white/50 rounded-lg">
-                <p className="text-sm text-gray-600">
-                  <span className="font-semibold">Note:</span> Support response times may be longer on weekends.
-                </p>
               </div>
             </div>
 
             {/* Social Media */}
-            <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">Follow Us</h3>
-              <div className="flex flex-wrap gap-3">
+            <div className="bg-white/80 backdrop-blur-lg border border-white rounded-2xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">Follow Us</h3>
+              <div className="flex flex-wrap gap-2">
                 {socialLinks.map((social, index) => (
                   <a
                     key={index}
                     href={social.url}
-                    className="flex items-center gap-2 px-4 py-2 bg-gray-50 hover:bg-orange-50 text-gray-700 hover:text-orange-600 rounded-lg transition-colors group"
+                    className="p-2.5 bg-gray-50 hover:bg-orange-500 text-gray-500 hover:text-white rounded-xl transition-all duration-300 hover:-translate-y-1"
+                    title={social.label}
                   >
-                    <div className="group-hover:scale-110 transition-transform">
-                      {social.icon}
-                    </div>
-                    <span className="font-medium">{social.label}</span>
+                    {social.icon}
                   </a>
                 ))}
               </div>
@@ -225,21 +224,24 @@ export default function ContactUs() {
 
           {/* Right Column - Contact Form */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 p-8">
+            <div className="bg-white rounded-3xl shadow-[0_20px_50px_rgb(0,0,0,0.05)] border border-gray-100 p-8 md:p-10 relative overflow-hidden">
+              {/* Decorative top gradient line */}
+              <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-orange-500 via-yellow-400 to-orange-500"></div>
+
               {submitted ? (
-                <div className="text-center py-12">
-                  <div className="h-20 w-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <CheckCircle className="h-10 w-10 text-green-600" />
+                <div className="text-center py-16 animate-fade-in">
+                  <div className="h-24 w-24 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
+                    <CheckCircle className="h-12 w-12 text-green-500 animate-bounce" />
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                    Message Sent Successfully! 🎉
+                  <h3 className="text-3xl font-extrabold text-gray-900 mb-4">
+                    Message Sent! 🎉
                   </h3>
-                  <p className="text-gray-600 mb-8 max-w-md mx-auto">
+                  <p className="text-gray-500 mb-8 max-w-md mx-auto text-lg">
                     Thank you for reaching out! Our team will review your message and get back to you within 24 hours.
                   </p>
                   <button
                     onClick={() => setSubmitted(false)}
-                    className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all"
+                    className="inline-flex items-center gap-2 px-8 py-3.5 bg-gray-900 text-white rounded-xl font-semibold hover:bg-gray-800 transition-all hover:shadow-lg"
                   >
                     Send Another Message
                   </button>
@@ -247,19 +249,19 @@ export default function ContactUs() {
               ) : (
                 <>
                   <div className="mb-8">
-                    <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                    <h2 className="text-3xl font-extrabold text-gray-900 mb-2">
                       Send us a Message
                     </h2>
-                    <p className="text-gray-600">
+                    <p className="text-gray-500">
                       Fill out the form below and we'll get back to you as soon as possible.
                     </p>
                   </div>
 
-                  <form onSubmit={handleSubmit} className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <form onSubmit={handleSubmit} className="space-y-5">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Full Name *
+                        <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                          Full Name <span className="text-orange-500">*</span>
                         </label>
                         <input
                           type="text"
@@ -267,14 +269,14 @@ export default function ContactUs() {
                           value={form.name}
                           onChange={handleChange}
                           placeholder="John Doe"
-                          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
+                          className="w-full px-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-orange-500/20 focus:border-orange-500 transition-all outline-none text-gray-800"
                           required
                         />
                       </div>
                       
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Email Address *
+                        <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                          Email Address <span className="text-orange-500">*</span>
                         </label>
                         <input
                           type="email"
@@ -282,21 +284,21 @@ export default function ContactUs() {
                           value={form.email}
                           onChange={handleChange}
                           placeholder="you@example.com"
-                          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
+                          className="w-full px-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-orange-500/20 focus:border-orange-500 transition-all outline-none text-gray-800"
                           required
                         />
                       </div>
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-semibold text-gray-700 mb-1.5">
                         Subject
                       </label>
                       <select
                         name="subject"
                         value={form.subject}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all bg-white"
+                        className="w-full px-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-orange-500/20 focus:border-orange-500 transition-all outline-none text-gray-800 cursor-pointer appearance-none"
                       >
                         <option value="">Select a subject</option>
                         <option value="General Inquiry">General Inquiry</option>
@@ -309,29 +311,29 @@ export default function ContactUs() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Message *
+                      <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                        Message <span className="text-orange-500">*</span>
                       </label>
                       <textarea
                         name="message"
                         value={form.message}
                         onChange={handleChange}
-                        rows="6"
+                        rows="5"
                         placeholder="Tell us how we can help you..."
-                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all resize-none"
+                        className="w-full px-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-orange-500/20 focus:border-orange-500 transition-all outline-none resize-none text-gray-800"
                         required
                       />
                     </div>
 
-                    <div className="flex items-center gap-2 text-sm text-gray-600 mb-6">
+                    <div className="flex items-center gap-2 text-sm text-gray-500 bg-gray-50 p-3 rounded-lg">
                       <Shield className="h-4 w-4 text-green-500" />
-                      <span>Your information is secure and will never be shared</span>
+                      <span>Your information is 100% secure and will never be shared.</span>
                     </div>
 
                     <button
                       type="submit"
                       disabled={loading}
-                      className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white px-8 py-4 rounded-xl font-semibold hover:from-orange-600 hover:to-orange-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed group"
+                      className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:from-orange-600 hover:to-orange-700 hover:shadow-lg hover:shadow-orange-500/30 transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed group"
                     >
                       {loading ? (
                         <>
@@ -352,59 +354,37 @@ export default function ContactUs() {
 
             {/* FAQ Section */}
             <div className="mt-12">
-              <div className="flex items-center justify-between mb-8">
-                <h2 className="text-2xl font-bold text-gray-900">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-extrabold text-gray-900">
                   Frequently Asked Questions
                 </h2>
-                <div className="flex items-center gap-2 text-orange-600">
-                  <Globe className="h-5 w-5" />
-                  <span className="font-medium">Quick Answers</span>
+                <div className="hidden md:flex items-center gap-2 text-orange-600 bg-orange-50 px-3 py-1.5 rounded-full text-sm font-semibold">
+                  <Globe className="h-4 w-4" />
+                  <span>Quick Answers</span>
                 </div>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {faqs.map((faq, index) => (
                   <div
                     key={index}
-                    className="bg-white rounded-2xl p-6 border border-gray-200 hover:border-orange-200 hover:shadow-lg transition-all duration-300"
+                    className="bg-white rounded-2xl p-6 border border-gray-100 hover:border-orange-200 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-all duration-300"
                   >
                     <div className="flex items-start gap-4">
                       <div className="flex-shrink-0">
-                        <div className="h-10 w-10 bg-orange-100 rounded-lg flex items-center justify-center">
-                          <span className="text-orange-600 font-bold">{index + 1}</span>
+                        <div className="h-8 w-8 bg-orange-100 text-orange-600 rounded-lg flex items-center justify-center font-bold text-sm">
+                          {index + 1}
                         </div>
                       </div>
                       <div>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                        <h3 className="text-base font-bold text-gray-900 mb-1.5 leading-tight">
                           {faq.question}
                         </h3>
-                        <p className="text-gray-600">{faq.answer}</p>
+                        <p className="text-sm text-gray-500 leading-relaxed">{faq.answer}</p>
                       </div>
                     </div>
                   </div>
                 ))}
-              </div>
-            </div>
-
-            {/* Quick Stats */}
-            <div className="mt-12 bg-gradient-to-r from-orange-50 to-yellow-50 border border-orange-100 rounded-2xl p-8">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-                <div>
-                  <div className="text-3xl font-bold text-gray-900 mb-2">24h</div>
-                  <div className="text-sm text-gray-600">Avg Response Time</div>
-                </div>
-                <div>
-                  <div className="text-3xl font-bold text-gray-900 mb-2">99%</div>
-                  <div className="text-sm text-gray-600">Satisfaction Rate</div>
-                </div>
-                <div>
-                  <div className="text-3xl font-bold text-gray-900 mb-2">50K+</div>
-                  <div className="text-sm text-gray-600">Happy Users</div>
-                </div>
-                <div>
-                  <div className="text-3xl font-bold text-gray-900 mb-2">100+</div>
-                  <div className="text-sm text-gray-600">Countries Served</div>
-                </div>
               </div>
             </div>
           </div>
@@ -412,70 +392,45 @@ export default function ContactUs() {
       </div>
 
       {/* Newsletter CTA */}
-      <div className="bg-gradient-to-r from-gray-900 to-gray-800">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
-          <h3 className="text-3xl font-bold text-white mb-4">
+      <div className="bg-gray-900 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center relative z-10">
+          <h3 className="text-3xl md:text-4xl font-extrabold text-white mb-4">
             Stay Updated with Food Trends
           </h3>
-          <p className="text-gray-300 mb-8 max-w-2xl mx-auto">
+          <p className="text-gray-400 mb-8 max-w-2xl mx-auto text-lg">
             Subscribe to our newsletter for weekly recipe inspirations, cooking tips, and exclusive content.
           </p>
-          <div className="max-w-md mx-auto flex flex-col sm:flex-row gap-4">
+          <div className="max-w-md mx-auto flex flex-col sm:flex-row gap-3">
             <input
               type="email"
               placeholder="Your email address"
-              className="flex-1 px-6 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="flex-1 px-6 py-4 rounded-xl bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 backdrop-blur-sm"
             />
-            <button className="px-8 py-3 bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-semibold rounded-xl hover:from-orange-600 hover:to-yellow-600 transition-all">
+            <button className="px-8 py-4 bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-bold rounded-xl hover:from-orange-600 hover:to-yellow-600 transition-all shadow-lg hover:shadow-orange-500/25">
               Subscribe
             </button>
           </div>
-          <p className="text-gray-400 text-sm mt-4">
-            No spam, unsubscribe anytime
+          <p className="text-gray-500 text-sm mt-4">
+            No spam, unsubscribe anytime.
           </p>
         </div>
       </div>
 
-      {/* Footer */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="text-center">
-          <div className="flex items-center justify-center gap-2 mb-6">
-            <ChefHat className="h-8 w-8 text-orange-600" />
-            <span className="text-2xl font-bold text-gray-900">
-              Cook<span className="text-orange-600">Book</span>
-            </span>
-          </div>
-          <p className="text-gray-600 mb-2">
-            Making cooking enjoyable and accessible for everyone
-          </p>
-          <p className="text-gray-500 text-sm">
-            © {new Date().getFullYear()} CookBook. All rights reserved.
-          </p>
-        </div>
-      </div>
-
-      {/* Animation Styles */}
-      <style jsx>{`
+      {/* Standard CSS for Animations (Instead of style jsx) */}
+      <style>{`
         @keyframes float {
           0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-10px); }
+          50% { transform: translateY(-15px); }
         }
         
-        .animate-float {
-          animation: float 6s ease-in-out infinite;
+        @keyframes fade-in {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
         }
-        
-        .animation-delay-1000 {
-          animation-delay: 1000ms;
-        }
-        
-        .animate-pulse {
-          animation: pulse 2s ease-in-out infinite;
-        }
-        
-        @keyframes pulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.5; }
+
+        .animate-fade-in {
+          animation: fade-in 0.5s ease-out forwards;
         }
       `}</style>
     </div>

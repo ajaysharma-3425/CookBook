@@ -23,6 +23,9 @@ app.use("/api/recipes", require("./routes/recipeRoutes"));
 app.use("/api/admin", require("./routes/adminRoutes"));
 app.use("/api/notifications", require("./routes/notificationRoutes"));
 
+// NAYA ROUTE: Contact Form ke liye
+app.use("/api/contact", require("./routes/contactRoutes"));
+
 app.get("/", (req, res) => {
   res.send("Cookbook API running");
 });
